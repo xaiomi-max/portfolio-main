@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>智能匹配助手 · JobMate v2.0</title>
+  <style>
+    :root {
+      --blue-50: #eff6ff;
+      --blue-600: #2563eb;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-800: #1f2937;
+      --green-100: #dcfce7;
+      --green-600: #16a34a;
+      --green-700: #15803d;
+      --red-50: #fef2f2;
+      --red-500: #ef4444;
+      --amber-600: #d97706;
+      --phone-w: 390px;
+      --phone-h: 844px;
+      --nav-h: 72px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--gray-800);
+    }
+
+    .page-wrap {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .phone {
+      width: var(--phone-w);
+      height: var(--phone-h);
+      background: #fff;
+      border-radius: 36px;
+      box-shadow: 0 25px 80px rgba(0,0,0,.35);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 8px solid #111;
+    }
+
+    .status-bar {
+      height: 44px;
+      background: var(--blue-50);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .screen {
+      flex: 1;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+    }
+
+    .screen.active { display: flex; }
+
+    .header {
+      background: var(--blue-50);
+      padding: 12px 16px;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .chip {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--gray-100);
+      color: var(--gray-500);
+    }
+
+    .chip.on { background: var(--green-100); color: var(--green-600); }
+
+    .chip.mode {
+      background: #dbeafe;
+      color: var(--blue-600);
+      margin-top: 6px;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 8px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-400);
+      letter-spacing: .08em;
+      margin-bottom: 12px;
+    }
+
+    .banner {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #9a3412;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .banner a { color: var(--blue-600); font-weight: 600; text-decoration: none; white-space: nowrap; }
+
+    .platform-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform .15s;
+    }
+
+    .platform-card:active { transform: scale(.98); }
+
+    .platform-card.disabled { opacity: .45; cursor: not-allowed; }
+
+    .platform-left { display: flex; align-items: center; gap: 12px; }
+
+    .platform-emoji {
+      font-size: 20px;
+      background: #fff;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .platform-name { font-size: 14px; font-weight: 700; }
+    .platform-pkg { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .badge.ready { background: var(--green-100); color: var(--green-600); }
+    .badge.soon { background: var(--gray-100); color: var(--gray-500); }
+    .badge.none { background: var(--red-50); color: var(--red-500); }
+
+    .bottom-nav {
+      display: flex;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      padding: 8px 8px calc(8px + var(--safe-bottom));
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      padding: 4px 0;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--gray-400);
+    }
+
+    .nav-item.active { color: var(--blue-600); font-weight: 700; }
+    .nav-item span { display: block; font-size: 18px; }
+    .nav-item small { font-size: 10px; }
+
+    .screen-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+
+    .filter-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .filter-chip.active {
+      background: var(--blue-600);
+      color: #fff;
+      border-color: var(--blue-600);
+    }
+
+    .history-card {
+      background: var(--gray-50);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .score { font-size: 22px; font-weight: 800; }
+    .score.high { color: var(--green-700); }
+    .score.mid { color: var(--amber-600); }
+    .score.low { color: var(--red-500); }
+
+    .history-meta { font-size: 11px; color: var(--gray-400); }
+
+    .history-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .history-company { font-size: 12px; color: var(--gray-500); }
+
+    .textarea {
+      width: 100%;
+      flex: 1;
+      min-height: 280px;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: none;
+      font-family: inherit;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--blue-600);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    .hint { font-size: 13px; color: var(--gray-400); margin-bottom: 16px; }
+
+    .setting-section {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin: 20px 0 10px;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .setting-row span:last-child { font-size: 12px; color: var(--blue-600); cursor: pointer; }
+
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status-dot.on { background: var(--green-600); }
+    .status-dot.off { background: var(--red-500); }
+
+    .segmented {
+      display: flex;
+      background: var(--gray-100);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 6px;
+    }
+
+    .segmented button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--gray-500);
+    }
+
+    .segmented button.active {
+      background: #fff;
+      color: var(--blue-600);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .slider-row { margin: 14px 0; }
+    .slider-row label { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 6px; }
+    input[type=range] { width: 100%; accent-color: var(--blue-600); }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .divider { height: 1px; background: var(--gray-200); margin: 20px 0; }
+
+    /* 悬浮窗 */
+    .overlay-dot {
+      position: absolute;
+      right: 16px;
+      bottom: calc(var(--nav-h) + 80px);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--green-600);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      cursor: pointer;
+      z-index: 20;
+      transition: transform .2s;
+    }
+
+    .overlay-dot.hidden { display: none; }
+    .overlay-dot small { font-size: 8px; opacity: .85; margin-top: -2px; }
+
+    .overlay-card {
+      position: absolute;
+      right: 12px;
+      bottom: calc(var(--nav-h) + 72px);
+      width: 240px;
+      background: rgba(255,255,255,.97);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.2);
+      z-index: 21;
+      display: none;
+    }
+
+    .overlay-card.show { display: block; }
+
+    .overlay-card h3 { font-size: 14px; color: var(--green-700); margin-bottom: 6px; }
+    .overlay-card .tag {
+      float: right;
+      font-size: 10px;
+      background: var(--gray-200);
+      padding: 2px 6px;
+      border-radius: 999px;
+      color: var(--gray-500);
+    }
+
+    .overlay-card .job { font-size: 12px; font-weight: 600; margin: 6px 0 2px; }
+    .overlay-card .company { font-size: 11px; color: var(--gray-500); }
+
+    .overlay-card ul { list-style: none; margin: 8px 0; font-size: 11px; }
+    .overlay-card li.ok { color: var(--green-700); margin-bottom: 4px; }
+    .overlay-card li.warn { color: var(--amber-600); margin-bottom: 4px; }
+
+    .overlay-card .suggest {
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: var(--gray-500);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .overlay-card .close { color: var(--gray-400); cursor: pointer; font-size: 11px; }
+
+    /* 侧边说明 */
+    .side-panel {
+      max-width: 360px;
+      background: rgba(255,255,255,.95);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.15);
+    }
+
+    .side-panel h2 { font-size: 18px; margin-bottom: 12px; }
+    .side-panel p { font-size: 14px; line-height: 1.7; color: var(--gray-500); margin-bottom: 10px; }
+    .side-panel code {
+      background: var(--gray-100);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .demo-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .demo-btns button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .demo-btns button.primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+
+    @media (max-width: 800px) {
+      .side-panel { max-width: var(--phone-w); }
+      body { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="phone" id="phone">
+      <div class="status-bar">9:41 · JobMate</div>
+
+      <!-- 首页 -->
+      <div class="screen active" id="screen-home">
+        <div class="header">
+          <h1>智能匹配助手 · JobMate v2.0</h1>
+          <div class="chips">
+            <span class="chip on" id="chip-a11y">无障碍: 开启</span>
+            <span class="chip on" id="chip-overlay">悬浮窗: 开启</span>
+          </div>
+          <span class="chip mode" id="mode-chip">仅分析模式</span>
+        </div>
+        <div class="content">
+          <div class="banner" id="perm-banner" style="display:none">
+            <span id="perm-msg">无障碍服务未开启</span>
+            <a href="#">去开启 →</a>
+          </div>
+          <div class="section-label">平台选择</div>
+          <div id="platform-list"></div>
+        </div>
+      </div>
+
+      <!-- 历史 -->
+      <div class="screen" id="screen-history">
+        <div class="content" style="padding-top:16px">
+          <div class="screen-title">历史记录</div>
+          <div class="filters">
+            <button class="filter-chip active" data-filter="all">全部</button>
+            <button class="filter-chip" data-filter="boss">BOSS</button>
+            <button class="filter-chip" data-filter="liepin">猎聘</button>
+            <button class="filter-chip" data-filter="shixiseng">实习僧</button>
+            <button class="filter-chip" data-filter="score70">≥70分</button>
+          </div>
+          <div id="history-list"></div>
+        </div>
+      </div>
+
+      <!-- 简历 -->
+      <div class="screen" id="screen-resume">
+        <div class="content" style="display:flex;flex-direction:column;height:100%">
+          <div class="screen-title">我的简历</div>
+          <p class="hint">直接粘贴文本即可，LLM 会据此判断匹配度</p>
+          <textarea class="textarea" id="resume-input" placeholder="姓名: &#10;学历: &#10;实习: &#10;项目经验: &#10;技能: "></textarea>
+          <button class="btn" onclick="saveResume()">保存简历</button>
+          <p class="hint" id="save-hint" style="display:none;color:var(--green-700)">✓ 已保存</p>
+        </div>
+      </div>
+
+      <!-- 设置 -->
+      <div class="screen" id="screen-settings">
+        <div class="content">
+          <div class="screen-title">设置</div>
+
+          <div class="setting-section">权限管理</div>
+          <div class="setting-row"><span><span class="status-dot on"></span>无障碍服务</span><span>已开启</span></div>
+          <div class="setting-row"><span><span class="status-dot on"></span>悬浮窗权限</span><span>已开启</span></div>
+          <div class="setting-row"><span><span class="status-dot on"></span>通知权限</span><span>已开启</span></div>
+          <div class="setting-row"><span><span class="status-dot off"></span>电池优化白名单</span><span>去设置</span></div>
+
+          <div class="divider"></div>
+          <div class="setting-section">工作模式</div>
+          <div class="segmented" id="mode-seg">
+            <button class="active" data-mode="analyze">仅分析模式</button>
+            <button data-mode="assistant">助手模式</button>
+          </div>
+          <p class="hint" id="mode-desc">仅分析模式：只显示匹配结果，不自动操作</p>
+
+          <div class="slider-row">
+            <label>匹配阈值 <strong id="threshold-val">60%</strong></label>
+            <input type="range" id="threshold" min="40" max="95" step="5" value="60" />
+          </div>
+
+          <div class="divider"></div>
+          <div class="setting-section">后端连接</div>
+          <input class="input" id="backend-url" value="http://192.168.1.100:8000" placeholder="后端 Base URL" />
+          <button class="btn" style="margin-top:10px;background:#fff;color:var(--blue-600);border:1px solid var(--blue-600)">测试连接</button>
+
+          <div class="divider"></div>
+          <div class="setting-section">悬浮窗</div>
+          <div class="slider-row">
+            <label>卡片透明度 <strong id="opacity-val">97%</strong></label>
+            <input type="range" id="opacity" min="50" max="100" value="97" />
+          </div>
+          <div class="slider-row">
+            <label>圆点大小 <strong id="dot-val">100%</strong></label>
+            <input type="range" id="dot-scale" min="80" max="130" value="100" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 悬浮窗 -->
+      <div class="overlay-dot hidden" id="overlay-dot" onclick="toggleOverlay()">
+        <span id="dot-score">82%</span>
+        <small id="dot-sub">✅</small>
+      </div>
+      <div class="overlay-card" id="overlay-card">
+        <span class="tag">BOSS</span>
+        <h3>🎯 匹配度: <span id="card-score">82%</span> <small style="background:var(--green-100);color:var(--green-700);padding:1px 4px;border-radius:4px;font-size:10px">极高</small></h3>
+        <div class="job" id="card-title">AI产品经理实习生</div>
+        <div class="company" id="card-company">字节跳动 · 250-400元/天</div>
+        <ul id="card-points">
+          <li class="ok">✓ 具备 Agent 设计与落地背景</li>
+          <li class="ok">✓ 掌握 Figma/原型等核心工具</li>
+          <li class="warn">⚠ 毕业届次需确认</li>
+        </ul>
+        <div class="suggest">
+          <span>💬 建议投递</span>
+          <span class="close" onclick="toggleOverlay()">× 收起</span>
+        </div>
+      </div>
+
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="home"><span>🏠</span><small>首页</small></button>
+        <button class="nav-item" data-tab="history"><span>📋</span><small>历史</small></button>
+        <button class="nav-item" data-tab="resume"><span>📝</span><small>简历</small></button>
+        <button class="nav-item" data-tab="settings"><span>⚙️</span><small>设置</small></button>
+      </nav>
+    </div>
+
+    <aside class="side-panel">
+      <h2>JobMate 本地 HTML 预览</h2>
+      <p>这是当前 Android App 的界面原型，双击打开本文件即可在浏览器预览。</p>
+      <p>文件路径：<code>~/Projects/JobMate/JobMate.html</code></p>
+      <p><strong>功能说明</strong></p>
+      <p>· 底部四个 Tab 可切换<br>· 点击已就绪平台模拟跳转 BOSS<br>· 切到非首页 Tab 时悬浮窗隐藏（与 App 一致）<br>· 设置页可切换分析/助手模式</p>
+      <div class="demo-btns">
+        <button class="primary" onclick="simulateBoss()">模拟 BOSS 匹配 82%</button>
+        <button onclick="simulateScanning()">模拟读取中</button>
+        <button onclick="simulateFail()">模拟未达阈值 45%</button>
+        <button onclick="toggleOverlayVisible()">切换悬浮窗显示</button>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const platforms = [
+      { id: 'boss', name: 'BOSS直聘', pkg: 'com.hpbr.bosszhipin', emoji: '📋', color: '#00D7C6', status: 'ready' },
+      { id: 'shixiseng', name: '实习僧', pkg: 'com.shixiseng.shixiseng', emoji: '🎓', color: '#FF5A5F', status: 'none' },
+      { id: 'liepin', name: '猎聘', pkg: 'com.liepin.liepin', emoji: '🔍', color: '#FF7800', status: 'ready' },
+      { id: 'zhaopin', name: '智联招聘', pkg: 'com.zhaopin.social', emoji: '📄', color: '#2563EB', status: 'soon' },
+      { id: 'jobcn', name: '前程无忧', pkg: 'com.jobcn.android', emoji: '📁', color: '#6B7280', status: 'soon' },
+    ];
+
+    const historyData = [
+      { platform: 'boss', platformName: 'BOSS', title: 'AI产品经理实习生 (大模型/Agent方向)', company: '字节跳动', salary: '250-400元/天', score: 82, time: '06-30 14:20' },
+      { platform: 'boss', platformName: 'BOSS', title: 'AI产品实习', company: '某互联网大厂', salary: '200-300元/天', score: 58, time: '06-29 09:15' },
+      { platform: 'liepin', platformName: '猎聘', title: '产品实习生', company: '美团', salary: '200-300元/天', score: 71, time: '06-28 16:40' },
+    ];
+
+    let currentTab = 'home';
+    let overlayExpanded = false;
+    let overlayEnabled = true;
+
+    function renderPlatforms() {
+      const list = document.getElementById('platform-list');
+      list.innerHTML = platforms.map(p => {
+        const badge = p.status === 'ready' ? ['ready', '▶ 已就绪'] : p.status === 'soon' ? ['soon', '即将支持'] : ['none', '未安装'];
+        const disabled = p.status !== 'ready';
+        return `<div class="platform-card ${disabled ? 'disabled' : ''}" style="border-color:${p.color}66;background:${p.color}14" onclick="openPlatform('${p.id}','${p.status}')">
+          <div class="platform-left">
+            <div class="platform-emoji">${p.emoji}</div>
+            <div><div class="platform-name">${p.name}</div><div class="platform-pkg">${p.pkg}</div></div>
+          </div>
+          <span class="badge ${badge[0]}">${badge[1]}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function renderHistory(filter = 'all') {
+      const list = document.getElementById('history-list');
+      let data = historyData;
+      if (filter !== 'all' && filter !== 'score70') data = data.filter(r => r.platform === filter);
+      if (filter === 'score70') data = data.filter(r => r.score >= 70);
+      if (!data.length) {
+        list.innerHTML = '<p style="text-align:center;color:var(--gray-400);padding:40px 0">暂无分析记录</p>';
+        return;
+      }
+      list.innerHTML = data.map(r => {
+        const cls = r.score >= 80 ? 'high' : r.score >= 60 ? 'mid' : 'low';
+        return `<div class="history-card">
+          <div class="history-top">
+            <div><div class="history-title">${r.title}</div><div class="history-company">${r.company} · ${r.salary}</div></div>
+            <div class="score ${cls}">${r.score}%</div>
+          </div>
+          <div class="history-meta">${r.platformName} · ${r.time}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + tab).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+      updateOverlayVisibility();
+    }
+
+    function updateOverlayVisibility() {
+      const dot = document.getElementById('overlay-dot');
+      const card = document.getElementById('overlay-card');
+      const show = overlayEnabled && currentTab === 'home';
+      if (!show) {
+        dot.classList.add('hidden');
+        card.classList.remove('show');
+        overlayExpanded = false;
+      } else if (!overlayExpanded) {
+        dot.classList.remove('hidden');
+      }
+    }
+
+    function openPlatform(id, status) {
+      if (status !== 'ready') return;
+      overlayEnabled = true;
+      simulateBoss();
+      alert('已打开 ' + platforms.find(p => p.id === id).name + '（HTML 模拟）\n悬浮窗已就绪');
+    }
+
+    function toggleOverlay() {
+      overlayExpanded = !overlayExpanded;
+      document.getElementById('overlay-dot').classList.toggle('hidden', overlayExpanded);
+      document.getElementById('overlay-card').classList.toggle('show', overlayExpanded);
+    }
+
+    function toggleOverlayVisible() {
+      overlayEnabled = !overlayEnabled;
+      updateOverlayVisibility();
+    }
+
+    function setOverlayScore(score, title, company, sub, points, suggest) {
+      document.getElementById('dot-score').textContent = score + '%';
+      document.getElementById('dot-sub').textContent = sub;
+      document.getElementById('card-score').textContent = score + '%';
+      document.getElementById('card-title').textContent = title;
+      document.getElementById('card-company').textContent = company;
+      document.getElementById('card-points').innerHTML = points;
+      document.querySelector('.overlay-card .suggest span').textContent = '💬 ' + suggest;
+      const dot = document.getElementById('overlay-dot');
+      dot.style.background = score >= 60 ? 'var(--green-600)' : score >= 40 ? 'var(--amber-600)' : 'var(--red-500)';
+    }
+
+    function simulateBoss() {
+      overlayEnabled = true;
+      setOverlayScore(82, 'AI产品经理实习生', '字节跳动 · 250-400元/天', '✅',
+        '<li class="ok">✓ 具备 Agent 设计与落地背景</li><li class="ok">✓ 掌握 Figma/原型等核心工具</li><li class="warn">⚠ 毕业届次需确认</li>',
+        '建议投递');
+      document.getElementById('overlay-dot').classList.remove('hidden');
+      document.getElementById('overlay-card').classList.remove('show');
+      overlayExpanded = false;
+    }
+
+    function simulateScanning() {
+      document.getElementById('dot-score').textContent = '…';
+      document.getElementById('dot-sub').textContent = '';
+      document.getElementById('overlay-dot').style.background = 'var(--gray-500)';
+      document.getElementById('overlay-dot').classList.remove('hidden');
+    }
+
+    function simulateFail() {
+      setOverlayScore(45, 'Java后端开发', '某创业公司 · 15-20K', '⚠️',
+        '<li class="warn">⚠ 缺少 Java 项目经验</li><li class="warn">⚠ 要求 3 年经验</li>',
+        '低于投递阈值');
+    }
+
+    function saveResume() {
+      localStorage.setItem('jobmate_resume', document.getElementById('resume-input').value);
+      const hint = document.getElementById('save-hint');
+      hint.style.display = 'block';
+      setTimeout(() => hint.style.display = 'none', 2000);
+    }
+
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        renderHistory(chip.dataset.filter);
+      });
+    });
+
+    document.getElementById('threshold').addEventListener('input', e => {
+      document.getElementById('threshold-val').textContent = e.target.value + '%';
+    });
+    document.getElementById('opacity').addEventListener('input', e => {
+      document.getElementById('opacity-val').textContent = e.target.value + '%';
+    });
+    document.getElementById('dot-scale').addEventListener('input', e => {
+      document.getElementById('dot-val').textContent = e.target.value + '%';
+    });
+
+    document.getElementById('mode-seg').addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      document.querySelectorAll('#mode-seg button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const isAssistant = btn.dataset.mode === 'assistant';
+      document.getElementById('mode-chip').textContent = isAssistant ? '助手模式' : '仅分析模式';
+      document.getElementById('mode-desc').textContent = isAssistant
+        ? '助手模式：匹配度 ≥ 阈值时自动打招呼'
+        : '仅分析模式：只显示匹配结果，不自动操作';
+    });
+
+    const saved = localStorage.getItem('jobmate_resume');
+    if (saved) document.getElementById('resume-input').value = saved;
+
+    renderPlatforms();
+    renderHistory();
+  </script>
+</body>
+</html>

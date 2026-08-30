@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刘舒锐 · AI 产品经理作品集</title>
+    <meta name="description" content="刘舒锐 · AI 产品经理作品集。已交付智能招聘 Agent、小说内容自动化产线等 AI 产品，关注从需求到交付的全链路闭环。">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231d3a5f'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23faf9f7' font-family='sans-serif'%3E%E5%88%98%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#faf9f7',
+                        ink: '#1a1a1a',
+                        accent: '#1d3a5f',
+                        line: '#e7e2da'
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans SC"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Noto Sans SC', sans-serif; }
+        html { scroll-behavior: smooth; }
+        body { background: #faf9f7; color: #1a1a1a; -webkit-font-smoothing: antialiased; }
+        section[id], footer[id] { scroll-margin-top: 5rem; }
+
+        .kicker { font-size: .78rem; letter-spacing: .25em; text-transform: uppercase; color: #1d3a5f; font-weight: 600; margin-bottom: .75rem; }
+        .section-h { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: #a8a29e; margin-bottom: .5rem; font-weight: 500; }
+        .group-h { display: flex; align-items: center; gap: .75rem; font-size: 1rem; font-weight: 700; color: #1a1a1a; }
+        .group-h::after { content: ''; flex: 1; height: 1px; background: #e7e2da; }
+        .badge { display: inline-block; font-size: .7rem; line-height: 1; padding: .4rem .7rem; border-radius: 9999px; white-space: nowrap; }
+        .badge-solid { background: #1d3a5f; color: #fff; }
+        .badge-outline { border: 1px solid #d6d0c6; color: #78716c; }
+        .badge-muted { background: #f0ede7; color: #a8a29e; }
+        .metric { background: rgba(29, 58, 95, .06); color: #1d3a5f; font-size: .78rem; font-weight: 500; padding: .35rem .65rem; border-radius: .5rem; white-space: nowrap; }
+        .skill { background: #fff; border: 1px solid #e7e2da; color: #57534e; font-size: .78rem; padding: .35rem .7rem; border-radius: .5rem; }
+        .card { transition: transform .25s ease, box-shadow .25s ease; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(26, 26, 26, .08); }
+        .step { position: relative; padding-left: 1.5rem; padding-bottom: 1.25rem; }
+        .step::before { content: ''; position: absolute; left: 7px; top: 4px; bottom: 0; width: 2px; background: #e7e2da; }
+        .step:last-child { padding-bottom: 0; }
+        .step:last-child::before { display: none; }
+        .step-no { position: absolute; left: 0; top: 2px; width: 1.4rem; height: 1.4rem; border-radius: 9999px; background: #1d3a5f; color: #fff; font-size: .72rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+        .chain { color: #1d3a5f; font-size: .78rem; font-weight: 500; }
+        .modal { display: none; }
+        .modal.show { display: flex; }
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-thumb { background: #d6d0c6; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-paper text-ink">
+
+    <!-- 导航 -->
+    <nav class="fixed top-0 inset-x-0 z-50 bg-paper/85 backdrop-blur-md border-b border-line">
+        <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="#" class="font-sans text-lg font-semibold">刘舒锐</a>
+            <div class="flex gap-7 text-sm text-stone-500">
+                <a href="#projects" class="hover:text-accent transition">作品</a>
+                <a href="#method" class="hover:text-accent transition">方法</a>
+                <a href="#about" class="hover:text-accent transition">关于</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="pt-36 pb-24 px-6">
+        <div class="max-w-5xl mx-auto">
+            <p class="kicker">AI 产品经理 · Portfolio</p>
+            <h1 class="font-sans text-5xl md:text-6xl font-bold leading-tight mb-6">刘舒锐</h1>
+            <p class="text-xl text-stone-700 mb-4">用产品思维做 AI 落地</p>
+            <p class="text-stone-500 leading-relaxed max-w-xl mb-12">
+                关注从需求到交付的全链路闭环。已落地智能招聘 Agent、小说内容自动化产线等 AI 产品；习惯在复杂约束下先做取舍、再做方案。
+            </p>
+            <div class="flex gap-4">
+                <a href="#projects" class="px-6 py-3 bg-accent text-white rounded-full text-sm font-medium hover:bg-[#152d49] transition">看作品</a>
+                <a href="#footer" class="px-6 py-3 border border-line text-stone-700 rounded-full text-sm font-medium hover:border-stone-400 transition">联系我</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品集 -->
+    <section id="projects" class="px-6 py-20 border-t border-line">
+        <div class="max-w-5xl mx-auto">
+            <div class="mb-16">
+                <p class="kicker">Work</p>
+                <h2 class="font-sans text-3xl font-semibold mb-3">交付过的产品</h2>
+                <p class="text-stone-500 text-base">按交付强度排序，状态如实标注。每个案例按推进过程展开——怎么拆、怎么取舍、怎么落地、怎么验证。</p>
+            </div>
+
+            <!-- A 已交付 -->
+            <div class="mb-16">
+                <h3 class="group-h mb-6">已交付 · Delivered</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <article class="card bg-white rounded-xl border border-line p-6 cursor-pointer" onclick="openModal('recruit')">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="font-sans text-xl font-semibold">智能招聘 Agent</h4>
+                            <span class="badge badge-solid">已上线</span>
+                        </div>
+                        <p class="text-stone-500 text-base leading-relaxed">筛选效率 +100%、入职率 ≈80%——把 HR 从人工筛简历和逐人打招呼里解放出来。</p>
+                    </article>
+
+                    <article class="card bg-white rounded-xl border border-line p-6 cursor-pointer" onclick="openModal('novel')">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="font-sans text-xl font-semibold">小说内容自动化产线</h4>
+                            <span class="badge badge-solid">已投产</span>
+                        </div>
+                        <p class="text-stone-500 text-base leading-relaxed">全自动「生成 → 分发 → 数据回收」闭环——日均沟通量 +50%，异常自愈、几乎零人工介入。</p>
+                    </article>
+
+                </div>
+            </div>
+
+            <!-- B 个人产品 -->
+            <div class="mb-16">
+                <h3 class="group-h mb-6">个人产品 · Personal builds</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <article class="card bg-white rounded-xl border border-line p-6 cursor-pointer" onclick="openModal('memoai')">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="font-sans text-xl font-semibold">MemoAI</h4>
+                            <span class="badge badge-outline">MVP 已跑通</span>
+                        </div>
+                        <p class="text-stone-500 text-base leading-relaxed">面向 ADHD 的零摩擦记录工具——规则兜底 + LLM 增强，能力、成本、延迟三者可控。</p>
+                    </article>
+
+                    <article class="card bg-white rounded-xl border border-line p-6 cursor-pointer" onclick="openModal('jobmate')">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="font-sans text-xl font-semibold">JobMate</h4>
+                            <span class="badge badge-muted">基础功能已完成</span>
+                        </div>
+                        <p class="text-stone-500 text-base leading-relaxed">无障碍读取招聘页 + AI 实时匹配度判断——只判断、不操作，守住助手的边界。</p>
+                    </article>
+
+                </div>
+            </div>
+
+            <!-- C 调研 & 探索中 -->
+            <div>
+                <h3 class="group-h mb-4">调研 & 探索中 · Research &amp; in progress</h3>
+                <div class="divide-y divide-line border-y border-line">
+                    <div class="flex items-center justify-between gap-4 py-5">
+                        <div>
+                            <h4 class="font-medium">乡村改造助手</h4>
+                            <p class="text-base text-stone-500 mt-1">拍照 → 多轮对话 → 生成带预算明细的乡村改造方案</p>
+                        </div>
+                        <span class="badge badge-muted shrink-0">进行中</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 py-5">
+                        <div>
+                            <h4 class="font-medium">果匠</h4>
+                            <p class="text-base text-stone-500 mt-1">拍照生成全套电商卖货素材，一键分发到多平台</p>
+                        </div>
+                        <span class="badge badge-muted shrink-0">进行中</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 py-5">
+                        <div>
+                            <h4 class="font-medium">AI 漫剧 &amp; 配音工具链测评</h4>
+                            <p class="text-base text-stone-500 mt-1">17+ 款 TTS / 图生视频工具实测打分，给出选型结论</p>
+                        </div>
+                        <span class="badge badge-muted shrink-0">调研</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 我怎么做产品 -->
+    <section id="method" class="px-6 py-20 border-t border-line">
+        <div class="max-w-5xl mx-auto">
+            <p class="kicker">Approach</p>
+            <h2 class="font-sans text-3xl font-semibold mb-14">我怎么做产品</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                <div>
+                    <div class="flex items-baseline gap-3 mb-3">
+                        <span class="font-sans text-2xl font-semibold text-accent">01</span>
+                        <h3 class="font-sans text-lg font-semibold">全链路交付</h3>
+                    </div>
+                    <p class="text-stone-500 text-base leading-relaxed mb-3">从需求拆解、方案设计到研发协同、上线与复盘，对最终结果负责。</p>
+                    <p class="text-sm text-stone-400">例：招聘 Agent、小说产线</p>
+                </div>
+                <div>
+                    <div class="flex items-baseline gap-3 mb-3">
+                        <span class="font-sans text-2xl font-semibold text-accent">02</span>
+                        <h3 class="font-sans text-lg font-semibold">约束下取舍</h3>
+                    </div>
+                    <p class="text-stone-500 text-base leading-relaxed mb-3">知道「什么不做」比「做什么」更重要；资源受限时先砍后补，把精力留给真正撬动结果的杠杆。</p>
+                    <p class="text-sm text-stone-400">例：Agent 每节点保留人工干预、商业化分期验证</p>
+                </div>
+                <div>
+                    <div class="flex items-baseline gap-3 mb-3">
+                        <span class="font-sans text-2xl font-semibold text-accent">03</span>
+                        <h3 class="font-sans text-lg font-semibold">AI 扩大交付边界</h3>
+                    </div>
+                    <p class="text-stone-500 text-base leading-relaxed mb-3">用 Agent / RPA / 全栈 AI Coding，把一个人的交付能力放大到一个小团队的体量。</p>
+                    <p class="text-sm text-stone-400">例：MemoAI、JobMate</p>
+                </div>
+                <div>
+                    <div class="flex items-baseline gap-3 mb-3">
+                        <span class="font-sans text-2xl font-semibold text-accent">04</span>
+                        <h3 class="font-sans text-lg font-semibold">数据驱动复盘</h3>
+                    </div>
+                    <p class="text-stone-500 text-base leading-relaxed mb-3">上线后用指标判断取舍，不靠感觉；把结果反哺到下一轮设计。</p>
+                    <p class="text-sm text-stone-400">例：筛选效率 +100%、入职率 ≈80%</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="px-6 py-20 border-t border-line">
+        <div class="max-w-5xl mx-auto">
+            <p class="kicker">About</p>
+            <h2 class="font-sans text-3xl font-semibold mb-12">背景与能力</h2>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <p class="text-stone-600 leading-relaxed mb-6">从建筑设计转到 AI 产品。习惯把复杂问题拆成可落地的链路，再用最小的方式验证。</p>
+                    <p class="text-sm text-stone-500"><span class="text-stone-700 font-medium">教育：</span>同济大学 · 建筑学学士 · 瑞典交换</p>
+                </div>
+                <div>
+                    <div class="mb-6">
+                        <h4 class="section-h mb-3">产品能力</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="skill">PRD</span>
+                            <span class="skill">Figma / Axure</span>
+                            <span class="skill">SQL / Excel 数据分析</span>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h4 class="section-h mb-3">AI 工具链</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="skill">Claude Code</span>
+                            <span class="skill">Cursor</span>
+                            <span class="skill">Coze Agent</span>
+                            <span class="skill">RPA</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="section-h mb-3">语言</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="skill">IELTS 6.5（阅读 8.5）</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer id="footer" class="px-6 py-14 border-t border-line bg-white">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+                <div>
+                    <p class="font-sans text-lg font-semibold mb-2">刘舒锐 · AI 产品经理</p>
+                    <p class="text-sm text-stone-500">随时欢迎聊聊 AI 产品与机会</p>
+                </div>
+                <div class="flex flex-col gap-2 text-sm text-stone-600">
+                    <a href="mailto:18326245613@163.com" class="hover:text-accent transition">邮箱 · 18326245613@163.com</a>
+                    <button onclick="copyWechat()" class="text-left hover:text-accent transition">微信 · L1332333464（点击复制）</button>
+                    <a href="https://github.com/xaiomi-max" target="_blank" rel="noopener" class="hover:text-accent transition">GitHub · xaiomi-max</a>
+                </div>
+            </div>
+            <div class="mt-10 pt-6 border-t border-line text-xs text-stone-400">© 2026 刘舒锐 · 用产品思维做 AI 落地</div>
+        </div>
+    </footer>
+
+    <!-- 项目详情弹窗 -->
+    <div id="modal" class="modal fixed inset-0 z-[60] items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl">
+            <button onclick="closeModal()" aria-label="关闭" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 transition">✕</button>
+            <div id="modalContent" class="modal-body p-8 overflow-y-auto max-h-[85vh]"></div>
+        </div>
+    </div>
+
+    <!-- 图片放大弹窗 -->
+    <div id="imageModal" class="modal fixed inset-0 z-[70] items-center justify-center p-6" onclick="closeImage()">
+        <div class="absolute inset-0 bg-black/80"></div>
+        <img id="expandedImage" src="" alt="放大查看" class="relative max-w-full max-h-full rounded-lg shadow-2xl">
+    </div>
+
+    <script>
+        const projects = {
+            recruit: {
+                title: "智能招聘 Agent",
+                content: `
+                    <div class="flex items-center justify-between gap-3 mb-1">
+                        <h3 class="font-sans text-2xl font-semibold">智能招聘 Agent</h3>
+                        <span class="badge badge-solid">已上线</span>
+                    </div>
+                    <p class="text-xs text-stone-400 mb-6">应用层产品设计 · PoC 验证 · 商业化规划</p>
+
+                    <img src="images/recruit.jpg" alt="飞书报告截图" class="w-full rounded-xl mb-1 cursor-zoom-in" onclick="expandImage(this)">
+                    <p class="text-xs text-stone-400 mb-6">飞书报告截图 · 点击放大</p>
+
+                    <div class="mb-6">
+                        <h4 class="section-h">背景</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">HR 传统招聘链路低效——人工打招呼、筛选 100 人仅约 3 人进入面试。</p>
+                    </div>
+                    <h4 class="section-h">我是怎么做的</h4>
+                    <div class="mb-6">
+                        <div class="step">
+                            <span class="step-no">1</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">拆链路，找瓶颈</p>
+                            <p class="text-base text-stone-600 leading-relaxed">把招聘拆成「需求 → 筛选 → 打招呼 → 预沟通 → 安排面试」逐环盘点，定位人工成本最高、转化最差的筛选与首轮沟通。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">2</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">定方案边界</p>
+                            <p class="text-base text-stone-600 leading-relaxed">对比「全 AI 接管」与「流程自动化 + Agent 编排」，选后者：每个节点保留人工干预，把业务可接受度放在自动化程度之前；预沟通走微信 RPA，贴近候选人真实触点。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">3</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">搭工作流，PoC 跑通再上线</p>
+                            <p class="text-base text-stone-600 leading-relaxed">飞书提需求 → 脚本自动流转 → 微信 RPA 加好友预沟通（含地域不符识别）→ 自动生成飞书报告。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">4</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">验证价值，分期规划商业化</p>
+                            <p class="text-base text-stone-600 leading-relaxed">用效率与入职率验证后，先做 Boss 直聘等跨平台适配 + 增值服务验证 PMF，不一次性铺开。</p>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h4 class="section-h">结果</h4>
+                        <p class="text-base font-medium text-accent">承接 30+ 岗位需求 · HR 筛选效率提升 100%+ · 入职率约 80%</p>
+                    </div>
+                    <div>
+                        <h4 class="section-h">复盘</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">入职率受「简历质量 × 预沟通话术」双变量影响；下一步按岗位分层调话术与评分权重，而不是继续堆自动化。</p>
+                    </div>
+                `
+            },
+            novel: {
+                title: "小说内容自动化产线",
+                content: `
+                    <div class="flex items-center justify-between gap-3 mb-1">
+                        <h3 class="font-sans text-2xl font-semibold">小说内容自动化产线</h3>
+                        <span class="badge badge-solid">已投产</span>
+                    </div>
+                    <p class="text-xs text-stone-400 mb-6">全链路定义 · RPA 系统设计（独立完成）</p>
+
+                    <img src="images/novel.jpg" alt="小说产线看板" class="w-full rounded-xl mb-1 cursor-zoom-in" onclick="expandImage(this)">
+                    <p class="text-xs text-stone-400 mb-6">产线看板 · 点击放大</p>
+
+                    <div class="mb-6">
+                        <h4 class="section-h">背景</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">AIGC 小说生成后，多平台编辑靠人工沟通荐稿，分发效率低。</p>
+                    </div>
+                    <h4 class="section-h">我是怎么做的</h4>
+                    <div class="mb-6">
+                        <div class="step">
+                            <span class="step-no">1</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">梳理全链路</p>
+                            <p class="text-base text-stone-600 leading-relaxed">把产线拆成「生成 → 荐稿 → 分发 → 数据回收」四段盘点，输出《网文平台生存状况报告》与产线看板 PRD。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">2</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">拆分发瓶颈</p>
+                            <p class="text-base text-stone-600 leading-relaxed">单账号串行荐稿是吞吐瓶颈，改为 QQ 多账号 RPA 状态机（空闲 → 荐稿中 → 异常 → 重试）并行分发。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">3</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">配置差异化话术</p>
+                            <p class="text-base text-stone-600 leading-relaxed">各平台荐稿话术按平台调性差异化配置，而非一套文案通用。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">4</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">闭环回收</p>
+                            <p class="text-base text-stone-600 leading-relaxed">建立数据回收，让分发结果回流，支撑下一轮生成与话术调优。</p>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h4 class="section-h">结果</h4>
+                        <p class="text-base font-medium text-accent">日均处理沟通量提升约 50%，实现「生成 → 分发 → 数据回收」全自动闭环。</p>
+                    </div>
+                    <div>
+                        <h4 class="section-h">复盘</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">状态机让异常自愈、几乎零人工介入；下一步把数据回收结果反哺生成侧做闭环调优。</p>
+                    </div>
+                `
+            },
+            memoai: {
+                title: "MemoAI · 思维整理工具",
+                content: `
+                    <div class="flex items-center justify-between gap-3 mb-1">
+                        <h3 class="font-sans text-2xl font-semibold">MemoAI</h3>
+                        <span class="badge badge-outline">MVP 已跑通</span>
+                    </div>
+                    <p class="text-xs text-stone-400 mb-6">产品设计 · 全栈 AI Coding（Cursor + Codex）</p>
+
+                    <img src="images/memoai.jpg" alt="MemoAI 界面" class="w-full rounded-xl mb-1 cursor-zoom-in" onclick="expandImage(this)">
+                    <p class="text-xs text-stone-400 mb-6">界面示意 · 点击放大</p>
+
+                    <div class="mb-6">
+                        <h4 class="section-h">背景</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">ADHD 人群「易遗忘、注意力易失焦」，需要零摩擦的记录工具。</p>
+                    </div>
+                    <h4 class="section-h">我是怎么做的</h4>
+                    <div class="mb-6">
+                        <div class="step">
+                            <span class="step-no">1</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">定场景与人群</p>
+                            <p class="text-base text-stone-600 leading-relaxed">聚焦 ADHD「记录即流失」的痛点，把「零摩擦」排在功能丰富度之前。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">2</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">设计分类规则</p>
+                            <p class="text-base text-stone-600 leading-relaxed">先定确定性规则：交付动词 → Task，创作动词 + 模糊对象 → Idea，有时间 → Task 优先——减少用户的判断成本。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">3</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">分层能力边界</p>
+                            <p class="text-base text-stone-600 leading-relaxed">本地规则引擎（离线/降级）与 DeepSeek API（在线）分层，按场景决定用谁。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">4</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">搭 MVP 验证</p>
+                            <p class="text-base text-stone-600 leading-relaxed">用 Cursor + Codex 全栈 AI Coding 快速搭起 Android MVP，配三层奖励机制（小屋 / 树洞 / 心愿兑换）维持使用动机。</p>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h4 class="section-h">结果</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">跑通 MVP，验证了 AI 在轻量级心理效率工具中的可行性。</p>
+                    </div>
+                    <div>
+                        <h4 class="section-h">复盘</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">结论不是「做得更多」，而是「规则先兜底、LLM 只做增强」——可控又省成本。</p>
+                    </div>
+                `
+            },
+            jobmate: {
+                title: "JobMate · 智能匹配助手",
+                content: `
+                    <div class="flex items-center justify-between gap-3 mb-1">
+                        <h3 class="font-sans text-2xl font-semibold">JobMate</h3>
+                        <span class="badge badge-muted">基础功能已完成</span>
+                    </div>
+                    <p class="text-xs text-stone-400 mb-6">产品设计 · 全栈 AI Coding</p>
+
+                    <img src="images/jobmate.jpg" alt="JobMate 设计稿" class="w-full rounded-xl mb-1 cursor-zoom-in" onclick="expandImage(this)">
+                    <p class="text-xs text-stone-400 mb-6">设计稿 · 点击放大</p>
+
+                    <div class="mb-6">
+                        <h4 class="section-h">背景</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">求职者刷招聘 App 需逐条判断岗位匹配度，效率低。</p>
+                    </div>
+                    <h4 class="section-h">我是怎么做的</h4>
+                    <div class="mb-6">
+                        <div class="step">
+                            <span class="step-no">1</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">定信息获取路径</p>
+                            <p class="text-base text-stone-600 leading-relaxed">对比「平台开放接口」与「无障碍服务读取」，选后者：零侵入、无需平台授权。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">2</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">划产品边界</p>
+                            <p class="text-base text-stone-600 leading-relaxed">只判断（✅ / ⚠️ / ❌）不投递——用户掌控感优先，规避合规风险。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">3</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">设计交互形态</p>
+                            <p class="text-base text-stone-600 leading-relaxed">极小收起态悬浮窗不遮挡浏览，点开展开匹配详情。</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-no">4</span>
+                            <p class="font-medium text-stone-800 text-base mb-1">打磨准确率</p>
+                            <p class="text-base text-stone-600 leading-relaxed">基础功能已跑通，当前专注匹配准确率与效果验证。</p>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <h4 class="section-h">状态</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">基础功能已完成，正在打磨匹配准确率。</p>
+                    </div>
+                    <div>
+                        <h4 class="section-h">复盘</h4>
+                        <p class="text-base text-stone-600 leading-relaxed">边界划在「只判断不操作」，是权限、体验与合规三者权衡下正确的取舍。</p>
+                    </div>
+                `
+            }
+        };
+
+        function openModal(key) {
+            const p = projects[key];
+            if (!p) return;
+            document.getElementById('modalContent').innerHTML = p.content;
+            document.getElementById('modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function expandImage(img) {
+            document.getElementById('expandedImage').src = img.src;
+            document.getElementById('imageModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeImage() {
+            document.getElementById('imageModal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function copyWechat() {
+            const text = 'L1332333464';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => alert('微信号已复制：' + text));
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                alert('微信号已复制：' + text);
+            }
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { closeModal(); closeImage(); }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memo — AI 待办 & 情绪小屋</title>
+  <style>
+    :root {
+      --primary: #2962FF;
+      --primary-dark: #2563EB;
+      --bg-top: #EDF5FC;
+      --bg-bottom: #F8FAFC;
+      --topbar: #C4E0F6;
+      --title: #1A1C1E;
+      --nav-inactive: #90A4AE;
+      --input-bg: #E0E4E8;
+      --bubble-bg: #A8CCE8;
+      --cabin-bg: #FBF9F1;
+      --cabin-top: #FDF8DF;
+      --cabin-beige: #F4E8BB;
+      --task-bg: #DCFCE7;
+      --task-accent: #15803D;
+      --ideas-bg: #FEF9C3;
+      --ideas-accent: #A16207;
+      --knowledge-bg: #F3E5F5;
+      --knowledge-accent: #9C27B0;
+      --shadow: 0 4px 20px rgba(0,0,0,.08);
+      --card-radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      color: var(--title);
+    }
+
+    .page-header {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 24px;
+      max-width: 420px;
+    }
+    .page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .page-header p { font-size: 14px; opacity: .9; line-height: 1.6; }
+
+    .phone {
+      width: 390px;
+      max-width: 100%;
+      height: 780px;
+      background: #111;
+      border-radius: 44px;
+      padding: 12px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.35);
+      position: relative;
+    }
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 28px;
+      background: #111;
+      border-radius: 0 0 18px 18px;
+      z-index: 10;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 34px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-bottom);
+      position: relative;
+    }
+
+    .screen-gradient {
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    }
+
+    .top-bar {
+      background: var(--topbar);
+      padding: 44px 16px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .top-bar h2 { font-size: 20px; font-weight: 700; }
+    .top-bar .back-btn {
+      background: none; border: none; font-size: 15px;
+      color: var(--title); cursor: pointer; padding: 4px 0;
+    }
+    .top-bar .icon-btn {
+      background: none; border: none; font-size: 20px; cursor: pointer;
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .content::-webkit-scrollbar { width: 0; }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: #D8E6F2;
+      border-radius: 14px;
+      padding: 0 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .search-box input {
+      flex: 1; border: none; background: transparent;
+      padding: 14px 8px; font-size: 14px; outline: none;
+    }
+
+    .bubble-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+    .bubble {
+      background: var(--bubble-bg);
+      padding: 10px 12px;
+      border-radius: 12px 12px 2px 12px;
+      font-size: 13px;
+      max-width: 85%;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06);
+    }
+
+    .memo-card {
+      border-radius: var(--card-radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .memo-card.tasks { background: var(--task-bg); border-left: 4px solid var(--task-accent); }
+    .memo-card.ideas { background: var(--ideas-bg); border-left: 4px solid var(--ideas-accent); }
+    .memo-card.knowledge { background: var(--knowledge-bg); border-left: 4px solid var(--knowledge-accent); }
+
+    .memo-card .type-tag {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      opacity: .7; margin-bottom: 4px;
+    }
+    .memo-card .summary { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .memo-card .content-text { font-size: 13px; line-height: 1.5; opacity: .85; }
+    .memo-card .time-text { font-size: 12px; color: #64748B; margin-top: 8px; }
+    .memo-card .card-actions {
+      display: flex; gap: 8px; margin-top: 10px; align-items: center;
+    }
+    .memo-card .card-actions button {
+      background: rgba(255,255,255,.6); border: none; border-radius: 8px;
+      padding: 6px 10px; font-size: 12px; cursor: pointer;
+    }
+    .memo-card.completed .summary { text-decoration: line-through; opacity: .5; }
+    .memo-card .check-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--task-accent); background: #fff;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .memo-card.completed .check-btn { background: var(--task-accent); color: #fff; border-color: var(--task-accent); }
+
+    .bottom-bar {
+      background: #fff;
+      padding: 10px 16px 20px;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(0,0,0,.04);
+    }
+    .input-row {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+    }
+    .input-row input {
+      flex: 1; background: var(--input-bg); border: none;
+      border-radius: 12px; padding: 12px 14px; font-size: 14px; outline: none;
+    }
+    .send-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--primary); border: none; color: #fff;
+      font-size: 18px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: transform .15s;
+    }
+    .send-btn:active { transform: scale(.92); }
+
+    .nav-row { display: flex; justify-content: space-around; }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 2px; cursor: pointer; padding: 4px 8px;
+      color: var(--nav-inactive); transition: color .2s;
+      background: none; border: none; font-family: inherit;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item .nav-icon { font-size: 22px; }
+    .nav-item .nav-label { font-size: 11px; font-weight: 500; }
+
+    .sub-tabs { display: flex; gap: 10px; margin-bottom: 8px; }
+    .sub-tab {
+      flex: 1; height: 52px; border-radius: var(--card-radius);
+      background: #fff; border: none; font-size: 13px; cursor: pointer;
+      box-shadow: var(--shadow); font-family: inherit; color: var(--title);
+      transition: box-shadow .2s;
+    }
+    .sub-tab.active { box-shadow: 0 6px 24px rgba(0,0,0,.12); font-weight: 600; }
+
+    .cabin-screen { background: var(--cabin-bg); }
+    .cabin-top { background: var(--cabin-top); }
+
+    .cabin-card {
+      background: #fff; border-radius: var(--card-radius);
+      padding: 18px 16px; margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+    .cabin-scene {
+      width: 100%; height: 180px; border-radius: 12px;
+      background: linear-gradient(180deg, #87CEEB 0%, #98D8AA 40%, #F4E8BB 100%);
+      position: relative; overflow: hidden; margin-bottom: 16px;
+    }
+    .cabin-scene .sun {
+      position: absolute; top: 20px; right: 30px;
+      width: 40px; height: 40px; background: #FFD54F;
+      border-radius: 50%; box-shadow: 0 0 20px rgba(255,213,79,.5);
+    }
+    .cabin-scene .house {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      width: 100px; height: 70px; background: #D4A574;
+      border-radius: 4px 4px 0 0;
+    }
+    .cabin-scene .house::before {
+      content: ""; position: absolute; top: -30px; left: -10px;
+      width: 0; height: 0;
+      border-left: 60px solid transparent;
+      border-right: 60px solid transparent;
+      border-bottom: 35px solid #C0392B;
+    }
+    .cabin-scene .tree {
+      position: absolute; bottom: 25px; left: 30px;
+      width: 8px; height: 40px; background: #795548;
+    }
+    .cabin-scene .tree::after {
+      content: ""; position: absolute; top: -25px; left: -16px;
+      width: 40px; height: 40px; background: #4CAF50; border-radius: 50%;
+    }
+    .cabin-scene .furniture {
+      position: absolute; bottom: 8px; font-size: 20px;
+      animation: popIn .5s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .progress-bar {
+      height: 15px; border: 1px solid #000; border-radius: 200px;
+      padding: 2px; margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%; background: #000; border-radius: 200px;
+      transition: width .6s ease;
+    }
+
+    .vent-options { display: flex; gap: 10px; margin-top: 16px; }
+    .vent-option {
+      flex: 1; text-align: center; cursor: pointer;
+    }
+    .vent-option .vent-box {
+      height: 100px; background: var(--cabin-beige);
+      border-radius: var(--card-radius); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 28px; transition: transform .2s;
+    }
+    .vent-option .vent-box:active { transform: scale(.95); }
+    .vent-option .vent-label { font-size: 13px; margin-top: 8px; }
+
+    .wish-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; font-size: 14px; font-weight: 500;
+    }
+    .wish-card {
+      background: #fff; border-radius: var(--card-radius);
+      padding: 14px; margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .wish-card .wish-title { font-weight: 600; margin-bottom: 4px; }
+    .wish-card .wish-price { font-size: 13px; color: #64748B; margin-bottom: 8px; }
+    .wish-progress {
+      height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden;
+    }
+    .wish-progress-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width .4s; }
+    .wish-btn {
+      margin-top: 10px; padding: 8px 16px; border-radius: 20px;
+      border: none; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    .wish-btn.redeem { background: var(--primary); color: #fff; }
+    .wish-btn.disabled { background: #E2E8F0; color: #94A3B8; cursor: default; }
+
+    .new-wish-btn {
+      display: block; margin: 16px auto; padding: 12px 32px;
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 24px; font-size: 14px; cursor: pointer; font-family: inherit;
+    }
+
+    .toast {
+      position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,.78); color: #fff; padding: 10px 20px;
+      border-radius: 20px; font-size: 13px; z-index: 100;
+      opacity: 0; transition: opacity .3s; pointer-events: none;
+      white-space: nowrap; max-width: 90%; text-align: center;
+    }
+    .toast.show { opacity: 1; }
+
+    .unlock-popup {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #fff; border-radius: 33px; padding: 20px 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.2); z-index: 50;
+      text-align: center; max-width: 260px; display: none;
+    }
+    .unlock-popup.show { display: block; animation: popIn .4s ease; }
+    .unlock-popup h3 { font-size: 15px; margin-bottom: 8px; }
+    .unlock-popup p { font-size: 13px; line-height: 1.6; margin-bottom: 12px; }
+    .unlock-popup button {
+      background: var(--primary); color: #fff; border: none;
+      padding: 8px 24px; border-radius: 20px; cursor: pointer; font-family: inherit;
+    }
+
+    .overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,.35);
+      z-index: 40; display: none; align-items: center; justify-content: center;
+    }
+    .overlay.show { display: flex; }
+    .dialog {
+      background: #fff; border-radius: 20px; padding: 24px;
+      width: 85%; max-width: 320px;
+    }
+    .dialog h3 { margin-bottom: 12px; }
+    .dialog input, .dialog textarea {
+      width: 100%; border: 1px solid #E2E8F0; border-radius: 10px;
+      padding: 10px 12px; font-size: 14px; margin-bottom: 10px;
+      font-family: inherit; outline: none;
+    }
+    .dialog textarea { height: 60px; resize: none; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+    .dialog-actions button {
+      padding: 8px 18px; border-radius: 20px; border: none;
+      cursor: pointer; font-family: inherit; font-size: 13px;
+    }
+    .dialog-actions .cancel { background: #F1F5F9; }
+    .dialog-actions .confirm { background: var(--primary); color: #fff; }
+
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: #94A3B8;
+    }
+    .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+
+    .features {
+      max-width: 420px; margin-top: 32px; color: #fff;
+    }
+    .features h3 { font-size: 16px; margin-bottom: 12px; opacity: .95; }
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .feature-item {
+      background: rgba(255,255,255,.12); backdrop-filter: blur(8px);
+      border-radius: 12px; padding: 12px; font-size: 12px; line-height: 1.5;
+    }
+    .feature-item strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+    .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .view.active { display: flex; }
+
+    .loading {
+      position: absolute; inset: 0; background: rgba(255,255,255,.6);
+      display: none; align-items: center; justify-content: center; z-index: 30;
+    }
+    .loading.show { display: flex; }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid #E2E8F0;
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .timestamp { font-size: 11px; color: #9E9E9E; text-align: center; margin: 8px 0; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Memo AI</h1>
+  <p>面向 ADHD 人群的 AI 待办 App — 做任务得贝壳，解锁小屋家具，随时去树洞放空</p>
+</div>
+
+<div class="phone">
+  <div class="screen" id="app">
+    <!-- Home View -->
+    <div class="view active" id="view-home">
+      <div class="top-bar">
+        <h2>Memo</h2>
+        <button class="icon-btn" onclick="showSettings()" title="设置">⚙️</button>
+      </div>
+      <div class="content screen-gradient" id="home-content"></div>
+      <div class="bottom-bar" id="home-bottom">
+        <div class="input-row">
+          <input type="text" id="home-input" placeholder="输入内容..." onkeydown="if(event.key==='Enter')submitFromHome()">
+          <button class="send-btn" onclick="submitFromHome()">✓</button>
+        </div>
+        <div class="nav-row" id="home-nav"></div>
+      </div>
+    </div>
+
+    <!-- Category View (Tasks/Ideas/Knowledge) -->
+    <div class="view" id="view-category">
+      <div class="top-bar">
+        <button class="back-btn" onclick="goHome()">返回</button>
+        <h2 id="category-title">Tasks</h2>
+        <span style="width:36px"></span>
+      </div>
+      <div class="search-box" id="category-search-wrap" style="margin:8px 16px 0">
+        <span>🔍</span>
+        <input type="text" id="category-search" placeholder="搜索..." oninput="renderCategory()">
+      </div>
+      <div class="content screen-gradient" id="category-content"></div>
+      <div class="bottom-bar">
+        <div class="nav-row" id="category-nav"></div>
+      </div>
+    </div>
+
+    <!-- Home Zone View -->
+    <div class="view" id="view-zone">
+      <div class="top-bar cabin-top">
+        <button class="back-btn" onclick="closeZone()">返回</button>
+        <h2>Memo</h2>
+        <span style="width:36px"></span>
+      </div>
+      <div class="content cabin-screen" id="zone-content"></div>
+      <div class="bottom-bar">
+        <div class="sub-tabs" id="zone-subtabs"></div>
+        <div class="nav-row" id="zone-nav"></div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading"><div class="spinner"></div></div>
+    <div class="toast" id="toast"></div>
+    <div class="unlock-popup" id="unlock-popup">
+      <h3>🏡 小屋新变化</h3>
+      <p id="unlock-text"></p>
+      <button onclick="goToCabin()">快去看看吧！</button>
+    </div>
+    <div class="overlay" id="overlay">
+      <div class="dialog" id="dialog"></div>
+    </div>
+  </div>
+</div>
+
+<div class="features">
+  <h3>核心功能</h3>
+  <div class="feature-grid">
+    <div class="feature-item"><strong>🤖 AI 智能分类</strong>自动识别待办、灵感、知识，支持云端大模型</div>
+    <div class="feature-item"><strong>⏰ 自然语言提醒</strong>「明天下午3点开会」自动解析并创建提醒</div>
+    <div class="feature-item"><strong>🏡 角落小屋</strong>完成任务解锁家具，进度可视化激励</div>
+    <div class="feature-item"><strong>🎯 心愿兑换</strong>用贝壳兑换心愿商品，短反馈回路驱动行动</div>
+    <div class="feature-item"><strong>🫂 解压树洞</strong>气泡解压、木鱼禅意、沙子放松</div>
+    <div class="feature-item"><strong>🔒 锁屏待办</strong>锁屏查看待办清单，一键完成</div>
+  </div>
+</div>
+
+<script>
+const FURNITURE = [
+  { at: 1, name: '小台灯', emoji: '💡' },
+  { at: 2, name: '绿植盆栽', emoji: '🪴' },
+  { at: 3, name: '舒适沙发', emoji: '🛋️' },
+  { at: 5, name: '书架', emoji: '📚' },
+  { at: 7, name: '樱花树', emoji: '🌸' },
+  { at: 10, name: '小猫咪', emoji: '🐱' },
+  { at: 15, name: '壁炉', emoji: '🔥' },
+  { at: 20, name: '望远镜', emoji: '🔭' },
+];
+
+const DEFAULT_MEMOS = [
+  { id: 1, type: 'Tasks', userInput: '明天下午3点开会', summary: '明天下午3点开会', content: '明天下午3点开会', timeText: '明天 15:00', completed: false, ts: Date.now() - 3600000 },
+  { id: 2, type: 'Ideas', userInput: '如果给App加一个离线语音识别功能', summary: '如果给App加...', content: '如果给App加一个离线语音识别功能\n\n[AI 脑风暴]：1) 先做最小可用版本验证需求。\n[AI 脑风暴]：2) 增加离线语音识别，弱网也可记录。', completed: false, ts: Date.now() - 7200000 },
+  { id: 3, type: 'Knowledge', userInput: '什么是番茄工作法', summary: '什么是番茄工作法', content: '什么是番茄工作法\n\n[延伸知识]：该概念通常用于提升系统结构表达能力，建议从定义、适用场景和一个真实案例三步学习。', completed: false, ts: Date.now() - 10800000 },
+];
+
+let state = loadState();
+let currentView = 'home';
+let currentCategory = null;
+let currentZone = 'cabin';
+let nextId = state.nextId || 4;
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('memoai_demo');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return {
+    memos: [...DEFAULT_MEMOS],
+    shellBalance: 5,
+    completedTasks: 0,
+    unlockedFurniture: [],
+    wishes: [],
+    nextId: 4
+  };
+}
+
+function saveState() {
+  state.nextId = nextId;
+  localStorage.setItem('memoai_demo', JSON.stringify(state));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function classify(text) {
+  const lower = text.toLowerCase();
+  const knowledgeKw = ['什么是','为什么','怎么','如何','原理','定义','解释','区别','对比','介绍','概念','百科'];
+  const taskKw = ['买','去','完成','提交','安排','提醒','联系','打电话','开会','打卡','待办','记得','别忘了','明天','后天','下午','上午'];
+  if (knowledgeKw.some(k => lower.includes(k)) || text.includes('？') || text.includes('?')) return 'Knowledge';
+  if (taskKw.some(k => lower.includes(k))) return 'Tasks';
+  return 'Ideas';
+}
+
+function parseTime(text) {
+  if (/明天.*(\d{1,2})[点时]/.test(text)) {
+    const m = text.match(/(\d{1,2})[点时]/);
+    return `明天 ${m[1].padStart(2,'0')}:00`;
+  }
+  if (/下午.*(\d{1,2})[点时]/.test(text)) {
+    const m = text.match(/(\d{1,2})[点时]/);
+    return `今天 ${m[1].padStart(2,'0')}:00`;
+  }
+  return null;
+}
+
+function aiProcess(text) {
+  const type = classify(text);
+  let content = text;
+  if (type === 'Ideas') {
+    content += '\n\n[AI 脑风暴]：1) 先做最小可用版本验证需求。\n[AI 脑风暴]：2) 增加离线语音识别，弱网也可记录。';
+  } else if (type === 'Knowledge') {
+    content += '\n\n[延伸知识]：该概念通常用于提升系统结构表达能力，建议从定义、适用场景和一个真实案例三步学习。';
+  }
+  const timeText = type === 'Tasks' ? parseTime(text) : null;
+  return {
+    type,
+    summary: text.length > 12 ? text.slice(0, 12) + '...' : text,
+    content,
+    timeText
+  };
+}
+
+async function submitFromHome() {
+  const input = document.getElementById('home-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('loading').classList.add('show');
+  await new Promise(r => setTimeout(r, 600));
+  const result = aiProcess(text);
+  state.memos.unshift({
+    id: nextId++,
+    type: result.type,
+    userInput: text,
+    summary: result.summary,
+    content: result.content,
+    timeText: result.timeText,
+    completed: false,
+    ts: Date.now()
+  });
+  saveState();
+  document.getElementById('loading').classList.remove('show');
+  showToast(`AI 已分类为 ${result.type}`);
+  renderHome();
+}
+
+function toggleComplete(id) {
+  const memo = state.memos.find(m => m.id === id);
+  if (!memo || memo.type !== 'Tasks') return;
+  memo.completed = !memo.completed;
+  if (memo.completed) {
+    state.completedTasks++;
+    state.shellBalance++;
+    const newFurniture = FURNITURE.filter(f =>
+      state.completedTasks >= f.at && !state.unlockedFurniture.includes(f.name)
+    );
+    if (newFurniture.length) {
+      newFurniture.forEach(f => state.unlockedFurniture.push(f.name));
+      const last = newFurniture[newFurniture.length - 1];
+      showUnlockPopup(state.completedTasks, last.name);
+    } else {
+      showToast('✅ 任务完成！+1🐚');
+    }
+  } else {
+    state.completedTasks = Math.max(0, state.completedTasks - 1);
+    state.shellBalance = Math.max(0, state.shellBalance - 1);
+    showToast('任务已取消完成');
+  }
+  saveState();
+  renderAll();
+}
+
+function showUnlockPopup(count, name) {
+  document.getElementById('unlock-text').innerHTML =
+    `你已完成了 ${count} 个 tasks<br>小屋长出了 <strong>${name}</strong>`;
+  document.getElementById('unlock-popup').classList.add('show');
+}
+
+function goToCabin() {
+  document.getElementById('unlock-popup').classList.remove('show');
+  openZone('cabin');
+}
+
+function deleteMemo(id) {
+  state.memos = state.memos.filter(m => m.id !== id);
+  saveState();
+  renderAll();
+}
+
+function renderNav(containerId, activeType, showMeme) {
+  const items = [
+    { type: 'Tasks', icon: '☑️', label: 'Tasks' },
+    { type: 'Ideas', icon: '💡', label: 'Ideas' },
+    { type: 'Knowledge', icon: '📖', label: 'Knowledge' },
+    { type: 'Home', icon: '🏠', label: 'Home' },
+  ];
+  document.getElementById(containerId).innerHTML = items.map(item => {
+    const active = item.type === 'Home' ? showMeme : (activeType === item.type && !showMeme);
+    const onclick = item.type === 'Home'
+      ? 'openZone("cabin")'
+      : `openCategory('${item.type}')`;
+    return `<button class="nav-item ${active ? 'active' : ''}" onclick="${onclick}">
+      <span class="nav-icon">${item.icon}</span>
+      <span class="nav-label">${item.label}</span>
+    </button>`;
+  }).join('');
+}
+
+function renderMemoCard(memo, showBubble) {
+  const typeClass = memo.type.toLowerCase();
+  const completedClass = memo.completed ? 'completed' : '';
+  let checkBtn = '';
+  if (memo.type === 'Tasks') {
+    checkBtn = `<button class="check-btn" onclick="toggleComplete(${memo.id})">${memo.completed ? '✓' : ''}</button>`;
+  }
+  const bubble = showBubble ? `<div class="bubble-row"><div class="bubble">${esc(memo.userInput)}</div></div>` : '';
+  const timeHtml = memo.timeText ? `<div class="time-text">⏰ ${esc(memo.timeText)}</div>` : '';
+  return `${bubble}
+    <div class="memo-card ${typeClass} ${completedClass}">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        ${checkBtn}
+        <div style="flex:1">
+          <div class="type-tag">${memo.type}</div>
+          <div class="summary">${esc(memo.summary)}</div>
+          <div class="content-text">${esc(memo.content.split('\n\n')[0])}</div>
+          ${timeHtml}
+          <div class="card-actions">
+            <button onclick="deleteMemo(${memo.id})">删除</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+}
+
+function renderHome() {
+  const el = document.getElementById('home-content');
+  if (!state.memos.length) {
+    el.innerHTML = '<div class="empty-state"><div class="emoji">📝</div><p>输入内容，AI 会自动分类<br>待办 · 灵感 · 知识</p></div>';
+  } else {
+    el.innerHTML = state.memos.slice(0, 20).map(m => {
+      return `<div class="timestamp">${formatTime(m.ts)}</div>` + renderMemoCard(m, true);
+    }).join('');
+  }
+  renderNav('home-nav', null, false);
+}
+
+function openCategory(type) {
+  currentCategory = type;
+  currentView = 'category';
+  document.getElementById('category-title').textContent = type;
+  document.getElementById('category-search').value = '';
+  showView('view-category');
+  renderCategory();
+}
+
+function renderCategory() {
+  const q = document.getElementById('category-search').value.trim().toLowerCase();
+  const filtered = state.memos.filter(m => {
+    if (m.type !== currentCategory) return false;
+    if (!q) return true;
+    return m.summary.toLowerCase().includes(q) || m.content.toLowerCase().includes(q);
+  });
+  const el = document.getElementById('category-content');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state"><div class="emoji">${currentCategory === 'Tasks' ? '☑️' : currentCategory === 'Ideas' ? '💡' : '📖'}</div><p>暂无${currentCategory}记录</p></div>`;
+  } else {
+    el.innerHTML = filtered.map(m => renderMemoCard(m, false)).join('');
+  }
+  renderNav('category-nav', currentCategory, false);
+}
+
+function goHome() {
+  currentView = 'home';
+  showView('view-home');
+  renderHome();
+}
+
+function openZone(tab) {
+  currentZone = tab;
+  currentView = 'zone';
+  showView('view-zone');
+  renderZone();
+}
+
+function closeZone() {
+  currentView = 'home';
+  showView('view-home');
+  renderHome();
+}
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderZone() {
+  const tabs = [
+    { id: 'cabin', label: '角落小屋' },
+    { id: 'vent', label: '解压树洞' },
+    { id: 'wish', label: '心愿兑换' },
+  ];
+  document.getElementById('zone-subtabs').innerHTML = tabs.map(t =>
+    `<button class="sub-tab ${currentZone === t.id ? 'active' : ''}" onclick="switchZone('${t.id}')">${t.label}</button>`
+  ).join('');
+
+  const el = document.getElementById('zone-content');
+  if (currentZone === 'cabin') el.innerHTML = renderCabin();
+  else if (currentZone === 'vent') el.innerHTML = renderVent();
+  else el.innerHTML = renderWish();
+
+  renderNav('zone-nav', null, true);
+}
+
+function switchZone(tab) {
+  currentZone = tab;
+  renderZone();
+}
+
+function renderCabin() {
+  const total = FURNITURE.length;
+  const unlocked = state.unlockedFurniture.length;
+  const progress = Math.round((unlocked / total) * 100);
+  const nextF = FURNITURE.find(f => state.completedTasks < f.at);
+  const tasksLeft = nextF ? nextF.at - state.completedTasks : 0;
+
+  const furnitureEmojis = FURNITURE
+    .filter(f => state.unlockedFurniture.includes(f.name))
+    .map((f, i) => `<span class="furniture" style="left:${20 + i * 35}px">${f.emoji}</span>`)
+    .join('');
+
+  return `
+    <div class="cabin-card">
+      <div class="cabin-scene">
+        <div class="sun"></div>
+        <div class="tree"></div>
+        <div class="house"></div>
+        ${furnitureEmojis}
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      <div style="text-align:center;font-size:14px;margin-bottom:4px">${progress}%</div>
+      <div style="text-align:center;font-size:14px">🏠 当前阶段：理想家园</div>
+      <div style="text-align:center;font-size:14px;margin-top:4px">已解锁 ${unlocked}/${total} 件家具</div>
+    </div>
+    <div class="cabin-card" style="display:flex;gap:16px;align-items:center">
+      <div style="width:80px;height:80px;background:var(--cabin-beige);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px">
+        ${nextF ? '🔒' : '✨'}
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:500">🔒 下一个家具：${nextF ? nextF.name : '已全部解锁'}</div>
+        <div style="font-size:12px;color:#6E7071;margin-top:6px">
+          ${nextF ? `还需完成 ${tasksLeft} 个 tasks` : '所有家具已解锁 🎉'}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderVent() {
+  const options = [
+    { label: '气泡解压', emoji: '🫧' },
+    { label: '木鱼禅意', emoji: '🪵' },
+    { label: '沙子放松', emoji: '🏖️' },
+  ];
+  return `
+    <div class="cabin-card" style="height:280px;display:flex;align-items:center;justify-content:center;text-align:center;color:#6E7071">
+      情绪释放区<br><span style="font-size:12px">点击下面的小工具开始解压</span>
+    </div>
+    <div class="vent-options">
+      ${options.map(o => `
+        <div class="vent-option" onclick="showToast('${o.label} — 功能演示中 🧘')">
+          <div class="vent-box">${o.emoji}</div>
+          <div class="vent-label">${o.label}</div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function renderWish() {
+  let html = `<div class="wish-header">
+    <span>🎯 心愿兑换</span>
+    <span>贝壳余额：${state.shellBalance}🐚</span>
+  </div>`;
+
+  if (!state.wishes.length) {
+    html += `<div class="empty-state"><div class="emoji">🎯</div><p>添加一个心愿<br>完成任务赚贝壳来兑换</p></div>`;
+  } else {
+    html += state.wishes.map(w => {
+      const pct = Math.min(100, Math.round((state.shellBalance / w.price) * 100));
+      const canRedeem = state.shellBalance >= w.price;
+      return `<div class="wish-card">
+        <div class="wish-title">${esc(w.title)}</div>
+        <div class="wish-price">${w.price}🐚 ${w.desc ? '· ' + esc(w.desc) : ''}</div>
+        <div class="wish-progress"><div class="wish-progress-fill" style="width:${pct}%"></div></div>
+        <button class="wish-btn ${canRedeem ? 'redeem' : 'disabled'}"
+          ${canRedeem ? `onclick="redeemWish(${w.id})"` : 'disabled'}>
+          ${canRedeem ? '立即兑换' : `还差 ${w.price - state.shellBalance}🐚`}
+        </button>
+      </div>`;
+    }).join('');
+  }
+  html += `<button class="new-wish-btn" onclick="showCreateWish()">+ 添加心愿</button>`;
+  return html;
+}
+
+function showCreateWish() {
+  document.getElementById('dialog').innerHTML = `
+    <h3>添加心愿</h3>
+    <input id="wish-title" placeholder="商品名称，如：无线耳机">
+    <input id="wish-price" type="number" placeholder="价格（贝壳）" value="10">
+    <textarea id="wish-desc" placeholder="备注（可选）"></textarea>
+    <div class="dialog-actions">
+      <button class="cancel" onclick="closeDialog()">取消</button>
+      <button class="confirm" onclick="createWish()">添加</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function createWish() {
+  const title = document.getElementById('wish-title').value.trim();
+  const price = parseInt(document.getElementById('wish-price').value) || 10;
+  const desc = document.getElementById('wish-desc').value.trim();
+  if (!title) return showToast('请输入商品名称');
+  state.wishes.push({ id: nextId++, title, price, desc });
+  saveState();
+  closeDialog();
+  renderZone();
+  showToast('心愿已添加 🎯');
+}
+
+function redeemWish(id) {
+  const wish = state.wishes.find(w => w.id === id);
+  if (!wish || state.shellBalance < wish.price) return;
+  state.shellBalance -= wish.price;
+  state.wishes = state.wishes.filter(w => w.id !== id);
+  saveState();
+  renderZone();
+  showToast(`🎉 已兑换「${wish.title}」！`);
+}
+
+function showSettings() {
+  document.getElementById('dialog').innerHTML = `
+    <h3>⚙️ 设置</h3>
+    <p style="font-size:13px;color:#64748B;line-height:1.6;margin-bottom:12px">
+      Memo AI v1.0<br>
+      Android · Kotlin · Jetpack Compose<br>
+      Room 数据库 · AI 智能分类 · 锁屏待办
+    </p>
+    <p style="font-size:13px;margin-bottom:12px">
+      已完成任务：<strong>${state.completedTasks}</strong><br>
+      贝壳余额：<strong>${state.shellBalance}🐚</strong><br>
+      解锁家具：<strong>${state.unlockedFurniture.length}/${FURNITURE.length}</strong>
+    </p>
+    <div class="dialog-actions">
+      <button class="cancel" onclick="closeDialog()">关闭</button>
+      <button class="confirm" onclick="resetDemo()">重置演示数据</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeDialog() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function resetDemo() {
+  localStorage.removeItem('memoai_demo');
+  state = loadState();
+  state.memos = [...DEFAULT_MEMOS];
+  state.shellBalance = 5;
+  state.completedTasks = 0;
+  state.unlockedFurniture = [];
+  state.wishes = [];
+  nextId = 4;
+  saveState();
+  closeDialog();
+  goHome();
+  showToast('演示数据已重置');
+}
+
+function renderAll() {
+  if (currentView === 'home') renderHome();
+  else if (currentView === 'category') renderCategory();
+  else if (currentView === 'zone') renderZone();
+}
+
+renderHome();
+</script>
+</body>
+</html>
